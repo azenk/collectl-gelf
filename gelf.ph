@@ -647,9 +647,24 @@ sub sendTCP
   my $data=shift;
 
   return            if $gexDebug & 8;
-  
-  utf8::encode($data);
-  send($gexSocket,$data . "\0", 0);
+
+  $data = $data . "\0";
+  my $length=length($data);
+  for (my $offset=0; $length>0; )
+  {
+    # Try to send via tcp  
+    my $bytes=send($gexSocket, substr($data, $offset), 0);
+    if (!defined($bytes))
+    {
+      print "Error: '$!' writing to socket";
+      # reconnect
+      close($gexSocket);
+      openSocket($gexHost,$gexPort);
+      last;
+    }
+    $offset+=$bytes;
+    $length-=$bytes;
+  }
 }
 
 sub sendUDP
