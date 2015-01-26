@@ -649,8 +649,7 @@ sub sendTCP
   return            if $gexDebug & 8;
   
   utf8::encode($data);
-  print $gexSocket $data;
-  print $gexSocket "\0";
+  send($gexSocket,$data . "\0", 0);
 }
 
 sub sendUDP
